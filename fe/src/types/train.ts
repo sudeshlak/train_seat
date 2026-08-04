@@ -1,0 +1,63 @@
+export interface Train {
+  routeId: number;
+  trainName: string;
+  departureTime: string;
+  from: string;
+  to: string;
+  stopStations: string[];
+}
+
+export interface TrainsResponse {
+  trains: Train[];
+}
+
+export interface Station {
+  id: number;
+  name: string;
+}
+
+export interface StopOrder {
+  order: number;
+  station: Station;
+}
+
+export interface RouteDetails {
+  trainName: string;
+  departureTime: string;
+  stopOrder: StopOrder[];
+}
+
+export interface Seat {
+  id: number;
+  number: number;
+}
+
+export interface Coach {
+  id: number;
+  number: number;
+}
+
+export interface ClassType {
+  id: number;
+  name: string;
+}
+
+export interface SeatWithDetails {
+  seat: Seat;
+  coach: Coach;
+  classType: ClassType;
+}
+
+export interface SeatRequest {
+  routeId: number;
+  from: number;
+  to: number;
+  date: string;
+}
+
+export interface SeatValidationError {
+  routeId?: string;
+  from?: string;
+  to?: string;
+  date?: string;
+}
