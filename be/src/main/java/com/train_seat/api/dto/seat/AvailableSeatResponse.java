@@ -12,4 +12,5 @@ public class AvailableSeatResponse {
 	private SeatSummary seat;
 	private CoachSummary coach;
 	private ClassTypeSummary classType;
+	private boolean available;
 }
