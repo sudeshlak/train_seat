@@ -3,6 +3,7 @@ import axios from "axios";
 export enum ErrorType {
   UNAUTHENTICATED = "UNAUTHENTICATED",
   VALIDATION = "VALIDATION",
+  CONFLICT = "CONFLICT",
   NETWORK = "NETWORK",
   SERVER = "SERVER",
   UNKNOWN = "UNKNOWN",
@@ -45,6 +46,14 @@ export function getApiError(error: unknown): ApiError {
         message,
         statusCode,
         details,
+      };
+    }
+
+    if (statusCode === 409) {
+      return {
+        type: ErrorType.CONFLICT,
+        message,
+        statusCode,
       };
     }
 

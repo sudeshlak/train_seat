@@ -1,5 +1,13 @@
 import { axiosClient } from "./axiosClient";
-import { TrainsResponse, RouteDetails, SeatRequest, SeatWithDetails } from "../types/train";
+import {
+  TrainsResponse,
+  RouteDetails,
+  SeatRequest,
+  SeatWithDetails,
+  BookSeatRequest,
+  BookingResponse,
+  BookingsResponse,
+} from "../types/train";
 
 export const trainApi = {
   getTrains: () => axiosClient.get<TrainsResponse>("/trains"),
@@ -7,4 +15,7 @@ export const trainApi = {
     axiosClient.get<RouteDetails>(`/route/${routeId}`),
   getSeats: (seatRequest: SeatRequest) =>
     axiosClient.post<SeatWithDetails[]>("/seats", seatRequest),
+  bookSeat: (request: BookSeatRequest) =>
+    axiosClient.post<BookingResponse>("/book/seat", request),
+  getBookings: () => axiosClient.get<BookingsResponse>("/bookings"),
 };
