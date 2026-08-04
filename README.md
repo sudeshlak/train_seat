@@ -14,23 +14,23 @@ Web Application:
   - Handles complex logics , heavy load 
   - Scalability
 
-1.2. Why monolith
+1.2.Why monolith
 
-1.3. why monolith over microservices
+1.3.Why monolith over microservices
 
 ---------------------------------------------------
 2.Front-end
 
 2.1. Why next
 
-2.2. 4 layers
-UI (pages + components)
-        ↓ user clicks / types
-ViewModel (page state + UI events)
-        ↓ calls
-Services (business rules)
-        ↓ calls
-API layer (Axios + error handling)
+2.2. Four layers
+  - UI (pages + components)
+            ↓ user clicks / types
+    ViewModel (page state + UI events)
+            ↓ calls
+    Services (business rules)
+            ↓ calls
+    API layer (Axios + error handling)
 
 2.3.State Mnagement
 
