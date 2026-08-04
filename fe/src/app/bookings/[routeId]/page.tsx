@@ -3,10 +3,18 @@
 import { useEffect, useState } from "react";
 import React from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchRouteThunk, fetchSeatsThunk } from "@/store/slices/bookingSlice";
+import {
+  fetchRouteThunk,
+  fetchSeatsThunk,
+  bookSeatThunk,
+  clearBookingSuccess,
+  clearBookingConflict,
+  clearUnavailableSeats,
+} from "@/store/slices/bookingSlice";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { SeatWithDetails } from "@/types/train";
+import { ErrorType } from "@/api/errors";
 
 const COLOMBO_TZ = "Asia/Colombo";
 
@@ -81,6 +89,10 @@ export default function BookingPage() {
     seats,
     loading,
     seatsLoading,
+    bookingLoading,
+    bookingSuccess,
+    bookingConflict,
+    unavailableSeatIds,
     error,
     validationErrors,
   } = useAppSelector((state) => state.booking);
@@ -103,26 +115,62 @@ export default function BookingPage() {
     }
   }, [dispatch, routeId, isAuthenticated, router]);
 
-  const handleFetchSeats = () => {
-    if (fromStationId && toStationId && date && routeId) {
-      dispatch(
-        fetchSeatsThunk({
+  const journeySeatsRequest = () =>
+    fromStationId && toStationId && date && routeId
+      ? {
           routeId: Number(routeId),
           from: Number(fromStationId),
           to: Number(toStationId),
           date,
-        }),
-      );
+        }
+      : null;
+
+  const resetJourneyFeedback = () => {
+    dispatch(clearBookingSuccess());
+    dispatch(clearBookingConflict());
+    dispatch(clearUnavailableSeats());
+    setSelectedSeat(null);
+  };
+
+  const handleFetchSeats = () => {
+    const request = journeySeatsRequest();
+    if (request) {
+      resetJourneyFeedback();
+      dispatch(fetchSeatsThunk(request));
     }
   };
 
-  const handleBookSeat = () => {
-    if (selectedSeat) {
-      // TODO: Implement booking API call
-      console.log("Booking seat:", selectedSeat);
-      alert(
-        `Booking seat ${selectedSeat.seat.number} in coach ${selectedSeat.coach.number}`,
-      );
+  const handleBookSeat = async () => {
+    if (!selectedSeat || !fromStationId || !toStationId || !date || !routeId) {
+      return;
+    }
+
+    const seatId = selectedSeat.seat.id;
+    const result = await dispatch(
+      bookSeatThunk({
+        routeId: Number(routeId),
+        seatId,
+        from: Number(fromStationId),
+        to: Number(toStationId),
+        date,
+      }),
+    );
+
+    setSelectedSeat(null);
+
+    const seatsRequest = journeySeatsRequest();
+    if (seatsRequest) {
+      dispatch(fetchSeatsThunk(seatsRequest));
+    }
+
+    if (bookSeatThunk.rejected.match(result)) {
+      const payload = result.payload as
+        | { type: ErrorType; message: string; seatId?: number }
+        | undefined;
+      if (payload?.type === ErrorType.CONFLICT) {
+        // Conflict message + unavailable seat already set in slice
+        return;
+      }
     }
   };
 
@@ -225,6 +273,27 @@ export default function BookingPage() {
           </div>
         )}
 
+        {bookingConflict && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6">
+            {bookingConflict}
+          </div>
+        )}
+
+        {bookingSuccess && (
+          <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-md mb-6">
+            <p className="font-medium">{bookingSuccess.message}</p>
+            <p className="text-sm mt-1">
+              Amount: LKR {bookingSuccess.amount.toFixed(2)}
+            </p>
+            <Link
+              href="/bookings"
+              className="inline-block mt-2 text-sm font-medium text-green-900 underline"
+            >
+              View my bookings
+            </Link>
+          </div>
+        )}
+
         {validationErrors.routeId && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6">
             {validationErrors.routeId}
@@ -280,6 +349,7 @@ export default function BookingPage() {
                     onChange={(e) => {
                       setFromStationId(e.target.value);
                       setToStationId("");
+                      resetJourneyFeedback();
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
@@ -310,7 +380,10 @@ export default function BookingPage() {
                   </label>
                   <select
                     value={toStationId}
-                    onChange={(e) => setToStationId(e.target.value)}
+                    onChange={(e) => {
+                      setToStationId(e.target.value);
+                      resetJourneyFeedback();
+                    }}
                     disabled={!fromStationId}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                   >
@@ -355,7 +428,10 @@ export default function BookingPage() {
                   <input
                     type="date"
                     value={date}
-                    onChange={(e) => setDate(e.target.value)}
+                    onChange={(e) => {
+                      setDate(e.target.value);
+                      resetJourneyFeedback();
+                    }}
                     min={getMinDate()}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
@@ -398,26 +474,43 @@ export default function BookingPage() {
                         Coach {coachNumber}
                       </h4>
                       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                        {coachSeats.map((seat) => (
-                          <button
-                            key={seat.seat.id}
-                            onClick={() => setSelectedSeat(seat)}
-                            className={`p-4 rounded-lg border-2 transition-all ${getClassColor(seat.classType.name)} ${
-                              selectedSeat?.seat.id === seat.seat.id
-                                ? "ring-2 ring-offset-2 ring-indigo-600"
-                                : ""
-                            }`}
-                          >
-                            <div className="text-center">
-                              <p className="font-semibold">
-                                {seat.seat.number}
-                              </p>
-                              <p className="text-xs opacity-75">
-                                {seat.classType.name}
-                              </p>
-                            </div>
-                          </button>
-                        ))}
+                        {coachSeats.map((seat) => {
+                          const unavailable = unavailableSeatIds.includes(
+                            seat.seat.id,
+                          );
+                          return (
+                            <button
+                              key={seat.seat.id}
+                              type="button"
+                              disabled={unavailable}
+                              onClick={() => {
+                                if (!unavailable) {
+                                  setSelectedSeat(seat);
+                                }
+                              }}
+                              className={`p-4 rounded-lg border-2 transition-all ${getClassColor(seat.classType.name)} ${
+                                selectedSeat?.seat.id === seat.seat.id
+                                  ? "ring-2 ring-offset-2 ring-indigo-600"
+                                  : ""
+                              } ${
+                                unavailable
+                                  ? "opacity-40 cursor-not-allowed grayscale"
+                                  : ""
+                              }`}
+                            >
+                              <div className="text-center">
+                                <p className="font-semibold">
+                                  {seat.seat.number}
+                                </p>
+                                <p className="text-xs opacity-75">
+                                  {unavailable
+                                    ? "Unavailable"
+                                    : seat.classType.name}
+                                </p>
+                              </div>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   ),
@@ -457,9 +550,13 @@ export default function BookingPage() {
                 </div>
                 <button
                   onClick={handleBookSeat}
-                  className="w-full bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 font-semibold"
+                  disabled={
+                    bookingLoading ||
+                    unavailableSeatIds.includes(selectedSeat.seat.id)
+                  }
+                  className="w-full bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
-                  Confirm Booking
+                  {bookingLoading ? "Booking..." : "Confirm Booking"}
                 </button>
               </div>
             )}
