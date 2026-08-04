@@ -46,6 +46,7 @@ export interface SeatWithDetails {
   seat: Seat;
   coach: Coach;
   classType: ClassType;
+  available: boolean;
 }
 
 export interface SeatRequest {

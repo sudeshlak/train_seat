@@ -56,7 +56,9 @@ function addOneDay(year: number, month: number, day: number) {
   };
 }
 
-function parseDepartureHm(departureTime: string): { hour: number; minute: number } | null {
+function parseDepartureHm(
+  departureTime: string,
+): { hour: number; minute: number } | null {
   const match = /^(\d{1,2}):(\d{2})(?::\d{2})?$/.exec(departureTime.trim());
   if (!match) return null;
   return { hour: Number(match[1]), minute: Number(match[2]) };
@@ -76,6 +78,19 @@ const getClassColor = (className: string): string => {
   };
   return colors[key] || "bg-gray-100 border-gray-300 text-gray-800";
 };
+
+const SHORT_CLASS: Record<string, string> = {
+  "1st class": "1st",
+  "first class": "1st",
+  "2nd class": "2nd",
+  "second class": "2nd",
+  "3rd class": "3rd",
+  "third class": "3rd",
+};
+
+function shortClassName(className: string): string {
+  return SHORT_CLASS[className.trim().toLowerCase()] ?? className;
+}
 
 export default function BookingPage() {
   const dispatch = useAppDispatch();
@@ -103,6 +118,7 @@ export default function BookingPage() {
   const [selectedSeat, setSelectedSeat] = useState<SeatWithDetails | null>(
     null,
   );
+  const [seatsStale, setSeatsStale] = useState(true);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -132,24 +148,38 @@ export default function BookingPage() {
     setSelectedSeat(null);
   };
 
-  const handleFetchSeats = () => {
+  const onJourneyFieldChange = () => {
+    setSeatsStale(true);
+    resetJourneyFeedback();
+  };
+
+  const handleFetchSeats = async () => {
     const request = journeySeatsRequest();
-    if (request) {
-      resetJourneyFeedback();
-      dispatch(fetchSeatsThunk(request));
+    if (!request) return;
+
+    resetJourneyFeedback();
+    const result = await dispatch(fetchSeatsThunk(request));
+    if (fetchSeatsThunk.fulfilled.match(result)) {
+      setSeatsStale(false);
     }
   };
 
   const handleBookSeat = async () => {
-    if (!selectedSeat || !fromStationId || !toStationId || !date || !routeId) {
+    if (
+      !selectedSeat ||
+      seatsStale ||
+      !fromStationId ||
+      !toStationId ||
+      !date ||
+      !routeId
+    ) {
       return;
     }
 
-    const seatId = selectedSeat.seat.id;
     const result = await dispatch(
       bookSeatThunk({
         routeId: Number(routeId),
-        seatId,
+        seatId: selectedSeat.seat.id,
         from: Number(fromStationId),
         to: Number(toStationId),
         date,
@@ -160,7 +190,10 @@ export default function BookingPage() {
 
     const seatsRequest = journeySeatsRequest();
     if (seatsRequest) {
-      dispatch(fetchSeatsThunk(seatsRequest));
+      const refresh = await dispatch(fetchSeatsThunk(seatsRequest));
+      if (fetchSeatsThunk.fulfilled.match(refresh)) {
+        setSeatsStale(false);
+      }
     }
 
     if (bookSeatThunk.rejected.match(result)) {
@@ -168,7 +201,6 @@ export default function BookingPage() {
         | { type: ErrorType; message: string; seatId?: number }
         | undefined;
       if (payload?.type === ErrorType.CONFLICT) {
-        // Conflict message + unavailable seat already set in slice
         return;
       }
     }
@@ -219,7 +251,6 @@ export default function BookingPage() {
       (s) => String(s.station.id) === String(stationId),
     );
 
-  // Group seats by coach
   const seatsByCoach = seats.reduce(
     (acc, seat) => {
       const coachNumber = String(seat.coach.number);
@@ -230,6 +261,43 @@ export default function BookingPage() {
       return acc;
     },
     {} as Record<string, SeatWithDetails[]>,
+  );
+
+  const canSelectSeat = (seat: SeatWithDetails) =>
+    !seatsStale &&
+    seat.available &&
+    !unavailableSeatIds.includes(seat.seat.id);
+
+  const bookingResultBanner = (placement: "top" | "bottom") => (
+    <>
+      {bookingConflict && (
+        <div
+          className={`bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md ${
+            placement === "top" ? "mb-6" : "mt-4"
+          }`}
+        >
+          {bookingConflict}
+        </div>
+      )}
+      {bookingSuccess && (
+        <div
+          className={`bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-md ${
+            placement === "top" ? "mb-6" : "mt-4"
+          }`}
+        >
+          <p className="font-medium">{bookingSuccess.message}</p>
+          <p className="text-sm mt-1">
+            Amount: LKR {bookingSuccess.amount.toFixed(2)}
+          </p>
+          <Link
+            href="/bookings"
+            className="inline-block mt-2 text-sm font-medium text-green-900 underline"
+          >
+            View my bookings
+          </Link>
+        </div>
+      )}
+    </>
   );
 
   if (loading) {
@@ -273,26 +341,7 @@ export default function BookingPage() {
           </div>
         )}
 
-        {bookingConflict && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6">
-            {bookingConflict}
-          </div>
-        )}
-
-        {bookingSuccess && (
-          <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-md mb-6">
-            <p className="font-medium">{bookingSuccess.message}</p>
-            <p className="text-sm mt-1">
-              Amount: LKR {bookingSuccess.amount.toFixed(2)}
-            </p>
-            <Link
-              href="/bookings"
-              className="inline-block mt-2 text-sm font-medium text-green-900 underline"
-            >
-              View my bookings
-            </Link>
-          </div>
-        )}
+        {bookingResultBanner("top")}
 
         {validationErrors.routeId && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6">
@@ -349,9 +398,9 @@ export default function BookingPage() {
                     onChange={(e) => {
                       setFromStationId(e.target.value);
                       setToStationId("");
-                      resetJourneyFeedback();
+                      onJourneyFieldChange();
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
                     <option value="">Select from station</option>
                     {routeDetails.stopOrder.map((stop) => (
@@ -363,11 +412,6 @@ export default function BookingPage() {
                       </option>
                     ))}
                   </select>
-                  {fromStationId && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      Selected: {findStopByStationId(fromStationId)?.station.name}
-                    </p>
-                  )}
                   {validationErrors.from && (
                     <p className="text-red-600 text-sm mt-1">
                       {validationErrors.from}
@@ -382,10 +426,10 @@ export default function BookingPage() {
                     value={toStationId}
                     onChange={(e) => {
                       setToStationId(e.target.value);
-                      resetJourneyFeedback();
+                      onJourneyFieldChange();
                     }}
                     disabled={!fromStationId}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-500"
                   >
                     <option value="">Select to station</option>
                     {fromStationId &&
@@ -410,11 +454,6 @@ export default function BookingPage() {
                         ));
                       })()}
                   </select>
-                  {toStationId && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      Selected: {findStopByStationId(toStationId)?.station.name}
-                    </p>
-                  )}
                   {validationErrors.to && (
                     <p className="text-red-600 text-sm mt-1">
                       {validationErrors.to}
@@ -430,22 +469,11 @@ export default function BookingPage() {
                     value={date}
                     onChange={(e) => {
                       setDate(e.target.value);
-                      resetJourneyFeedback();
+                      onJourneyFieldChange();
                     }}
                     min={getMinDate()}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
-                  {date && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      Selected:{" "}
-                      {new Date(`${date}T00:00:00`).toLocaleDateString("en-US", {
-                        weekday: "short",
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </p>
-                  )}
                   {validationErrors.date && (
                     <p className="text-red-600 text-sm mt-1">
                       {validationErrors.date}
@@ -460,57 +488,68 @@ export default function BookingPage() {
               >
                 {seatsLoading ? "Loading..." : "Check for Seats"}
               </button>
+              {seatsStale && seats.length > 0 && (
+                <p className="text-sm text-amber-700 mt-2">
+                  Journey details changed. Hit Check for Seats to update
+                  availability.
+                </p>
+              )}
             </div>
 
             {seats.length > 0 && (
               <div className="bg-white rounded-lg shadow-md p-6 mb-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-1">
-                  Available Seats
+                  Seats
                 </h3>
                 <p className="text-sm text-gray-500 mb-4">
-                  Only online-bookable coaches are shown.
+                  Only online-bookable coaches are shown. Gray seats are taken
+                  or locked until you check again.
                 </p>
                 {Object.entries(seatsByCoach).map(
                   ([coachNumber, coachSeats]) => (
                     <div key={coachNumber} className="mb-6">
-                      <h4 className="text-lg font-medium text-gray-800 mb-3">
+                      <h4 className="text-sm font-medium text-gray-800 mb-2">
                         Coach {coachNumber}
+                        {coachSeats[0] && (
+                          <span className="text-gray-500 font-normal">
+                            {" "}
+                            · {coachSeats[0].classType.name}
+                          </span>
+                        )}
                       </h4>
-                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                      <div className="grid grid-cols-8 md:grid-cols-10 gap-1.5">
                         {coachSeats.map((seat) => {
-                          const unavailable = unavailableSeatIds.includes(
-                            seat.seat.id,
-                          );
+                          const selectable = canSelectSeat(seat);
+                          const selected =
+                            selectedSeat?.seat.id === seat.seat.id;
                           return (
                             <button
                               key={seat.seat.id}
                               type="button"
-                              disabled={unavailable}
+                              disabled={!selectable}
                               onClick={() => {
-                                if (!unavailable) {
+                                if (selectable) {
                                   setSelectedSeat(seat);
                                 }
                               }}
-                              className={`p-4 rounded-lg border-2 transition-all ${getClassColor(seat.classType.name)} ${
-                                selectedSeat?.seat.id === seat.seat.id
-                                  ? "ring-2 ring-offset-2 ring-indigo-600"
-                                  : ""
+                              className={`p-1.5 rounded border transition-all text-center ${
+                                selectable
+                                  ? getClassColor(seat.classType.name)
+                                  : "bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed"
                               } ${
-                                unavailable
-                                  ? "opacity-40 cursor-not-allowed grayscale"
+                                selected
+                                  ? "ring-2 ring-offset-1 ring-indigo-600"
                                   : ""
                               }`}
                             >
-                              <div className="text-center">
-                                <p className="font-semibold">
-                                  {seat.seat.number}
-                                </p>
-                                <p className="text-xs opacity-75">
-                                  {unavailable
-                                    ? "Unavailable"
-                                    : seat.classType.name}
-                                </p>
-                              </div>
+                              <p className="text-xs font-semibold leading-tight">
+                                {seat.seat.number}
+                              </p>
+                              <p className="text-[10px] leading-tight opacity-80">
+                                {selectable
+                                  ? shortClassName(seat.classType.name)
+                                  : "—"}
+                              </p>
                             </button>
                           );
                         })}
@@ -521,46 +560,58 @@ export default function BookingPage() {
               </div>
             )}
 
-            {selectedSeat && (
+            {seats.length > 0 && (
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                  Booking Summary
+                  Booking
                 </h3>
-                <div className="space-y-2 mb-4">
-                  <p className="text-gray-700">
-                    <span className="font-medium">Seat:</span>{" "}
-                    {selectedSeat.seat.number}
+                {selectedSeat && !seatsStale ? (
+                  <div className="space-y-2 mb-4">
+                    <p className="text-gray-700">
+                      <span className="font-medium">Seat:</span>{" "}
+                      {selectedSeat.seat.number}
+                    </p>
+                    <p className="text-gray-700">
+                      <span className="font-medium">Coach:</span>{" "}
+                      {selectedSeat.coach.number}
+                    </p>
+                    <p className="text-gray-700">
+                      <span className="font-medium">Class:</span>{" "}
+                      {selectedSeat.classType.name}
+                    </p>
+                    <p className="text-gray-700">
+                      <span className="font-medium">From:</span>{" "}
+                      {findStopByStationId(fromStationId)?.station.name}
+                    </p>
+                    <p className="text-gray-700">
+                      <span className="font-medium">To:</span>{" "}
+                      {findStopByStationId(toStationId)?.station.name}
+                    </p>
+                    <p className="text-gray-700">
+                      <span className="font-medium">Date:</span> {date}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 mb-4">
+                    {seatsStale
+                      ? "Check for seats after updating journey details, then select a seat."
+                      : "Select an available seat above to confirm a booking."}
                   </p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">Coach:</span>{" "}
-                    {selectedSeat.coach.number}
-                  </p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">Class:</span>{" "}
-                    {selectedSeat.classType.name}
-                  </p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">From:</span>{" "}
-                    {findStopByStationId(fromStationId)?.station.name}
-                  </p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">To:</span>{" "}
-                    {findStopByStationId(toStationId)?.station.name}
-                  </p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">Date:</span> {date}
-                  </p>
-                </div>
+                )}
                 <button
                   onClick={handleBookSeat}
                   disabled={
                     bookingLoading ||
-                    unavailableSeatIds.includes(selectedSeat.seat.id)
+                    seatsStale ||
+                    !selectedSeat ||
+                    (selectedSeat != null &&
+                      unavailableSeatIds.includes(selectedSeat.seat.id))
                   }
                   className="w-full bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                   {bookingLoading ? "Booking..." : "Confirm Booking"}
                 </button>
+                {bookingResultBanner("bottom")}
               </div>
             )}
           </div>
