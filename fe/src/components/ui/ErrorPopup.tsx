@@ -1,12 +1,16 @@
 "use client";
 
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { clearGlobalError } from "@/store/slices/authSlice";
+import { clearGlobalError as clearAuthGlobalError } from "@/store/slices/authSlice";
+import { clearTrainGlobalError } from "@/store/slices/trainSlice";
 import { ErrorType } from "@/api/errors";
 
 export function ErrorPopup() {
-  const { globalError } = useAppSelector((state) => state.auth);
+  const authGlobalError = useAppSelector((state) => state.auth.globalError);
+  const trainGlobalError = useAppSelector((state) => state.train.globalError);
   const dispatch = useAppDispatch();
+
+  const globalError = authGlobalError || trainGlobalError;
 
   if (!globalError) return null;
 
@@ -18,11 +22,21 @@ export function ErrorPopup() {
   const handleRetry = () => {
     // In a real implementation, you'd call the original action again
     // For now, just clear the error
-    dispatch(clearGlobalError());
+    if (authGlobalError) {
+      dispatch(clearAuthGlobalError());
+    }
+    if (trainGlobalError) {
+      dispatch(clearTrainGlobalError());
+    }
   };
 
   const handleClose = () => {
-    dispatch(clearGlobalError());
+    if (authGlobalError) {
+      dispatch(clearAuthGlobalError());
+    }
+    if (trainGlobalError) {
+      dispatch(clearTrainGlobalError());
+    }
   };
 
   return (
