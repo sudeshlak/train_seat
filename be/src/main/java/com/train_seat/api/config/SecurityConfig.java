@@ -60,6 +60,7 @@ public class SecurityConfig {
 				.authenticationProvider(authenticationProvider)
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers(HttpMethod.POST, "/auth/login", "/auth/signup").permitAll()
+						.requestMatchers(HttpMethod.GET, "/trains").permitAll()
 						.requestMatchers(
 								"/swagger-ui/**",
 								"/swagger-ui.html",
