@@ -1,26 +1,37 @@
 import axios from "axios";
 
 export enum ErrorType {
-  UNAUTHENTICATED = "UNAUTHENTICATED", // 400 - redirect to login
-  VALIDATION = "VALIDATION", // show in form
-  NETWORK = "NETWORK", // popup with retry
-  SERVER = "SERVER", // popup with retry
-  UNKNOWN = "UNKNOWN", // popup with retry
+  UNAUTHENTICATED = "UNAUTHENTICATED",
+  VALIDATION = "VALIDATION",
+  NETWORK = "NETWORK",
+  SERVER = "SERVER",
+  UNKNOWN = "UNKNOWN",
 }
 
 export interface ApiError {
   type: ErrorType;
   message: string;
   statusCode?: number;
+  details?: Record<string, string>;
+}
+
+function isDetailsMap(value: unknown): value is Record<string, string> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return false;
+  }
+  return Object.values(value).every((entry) => typeof entry === "string");
 }
 
 export function getApiError(error: unknown): ApiError {
   if (axios.isAxiosError(error)) {
     const statusCode = error.response?.status;
-    const message = error.response?.data?.message ?? "Something went wrong";
+    const data = error.response?.data as
+      | { message?: string; details?: unknown }
+      | undefined;
+    const message = data?.message ?? "Something went wrong";
+    const details = isDetailsMap(data?.details) ? data.details : undefined;
 
-    // Categorize errors based on status code
-    if (statusCode === 401 || statusCode === 400) {
+    if (statusCode === 401) {
       return {
         type: ErrorType.UNAUTHENTICATED,
         message,
@@ -28,15 +39,13 @@ export function getApiError(error: unknown): ApiError {
       };
     }
 
-    if (statusCode === 422 || statusCode === 400) {
-      // Validation errors often come as 422 or 400 with field-specific messages
-      if (error.response?.data?.errors) {
-        return {
-          type: ErrorType.VALIDATION,
-          message,
-          statusCode,
-        };
-      }
+    if (statusCode === 400 || statusCode === 422) {
+      return {
+        type: ErrorType.VALIDATION,
+        message,
+        statusCode,
+        details,
+      };
     }
 
     if (statusCode && statusCode >= 500) {
@@ -48,7 +57,6 @@ export function getApiError(error: unknown): ApiError {
     }
 
     if (!error.response) {
-      // Network error (no response)
       return {
         type: ErrorType.NETWORK,
         message: "Network error. Please check your connection.",

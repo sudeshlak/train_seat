@@ -3,14 +3,18 @@
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { clearGlobalError as clearAuthGlobalError } from "@/store/slices/authSlice";
 import { clearTrainGlobalError } from "@/store/slices/trainSlice";
+import { clearBookingGlobalError } from "@/store/slices/bookingSlice";
 import { ErrorType } from "@/api/errors";
 
 export function ErrorPopup() {
   const authGlobalError = useAppSelector((state) => state.auth.globalError);
   const trainGlobalError = useAppSelector((state) => state.train.globalError);
+  const bookingGlobalError = useAppSelector(
+    (state) => state.booking.globalError,
+  );
   const dispatch = useAppDispatch();
 
-  const globalError = authGlobalError || trainGlobalError;
+  const globalError = authGlobalError || trainGlobalError || bookingGlobalError;
 
   if (!globalError) return null;
 
@@ -28,6 +32,9 @@ export function ErrorPopup() {
     if (trainGlobalError) {
       dispatch(clearTrainGlobalError());
     }
+    if (bookingGlobalError) {
+      dispatch(clearBookingGlobalError());
+    }
   };
 
   const handleClose = () => {
@@ -36,6 +43,9 @@ export function ErrorPopup() {
     }
     if (trainGlobalError) {
       dispatch(clearTrainGlobalError());
+    }
+    if (bookingGlobalError) {
+      dispatch(clearBookingGlobalError());
     }
   };
 

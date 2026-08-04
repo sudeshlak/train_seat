@@ -81,9 +81,9 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="grid gap-4">
-            {trains.map((train, index) => (
+            {trains.map((train) => (
               <div
-                key={index}
+                key={train.routeId}
                 className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
               >
                 <div className="flex justify-between items-start">
@@ -108,7 +108,7 @@ export default function HomePage() {
                   <div className="ml-4">
                     {isAuthenticated ? (
                       <Link
-                        href={`/bookings?trainName=${encodeURIComponent(train.trainName)}&from=${encodeURIComponent(train.from)}&to=${encodeURIComponent(train.to)}&departure=${encodeURIComponent(train.departureTime)}`}
+                        href={`/bookings/${train.routeId}`}
                         className="inline-block bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
                       >
                         Book Now

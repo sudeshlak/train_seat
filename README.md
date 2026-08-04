@@ -26,7 +26,7 @@ Build setup
 
 1.4. Libraries
   - Spring Security - for JWT Auth
-  - Lombok - Reduce Boilerplate codes
+  - Lombok - Reduce Repeating codes
   - Flyway - minimize migration workload
   - 
 
@@ -43,8 +43,8 @@ Build setup
   API layer (Axios + error handling)
 
 2.3.Libraries
-  - Redux-toolkit - state management
-  - Axios - network calls
+  - Redux-toolkit - State management
+  - Axios - Simplify handling network calls, errors
 
 ---------------------------------------------------
 3.RDBMS
@@ -71,3 +71,78 @@ Build setup
       ├── Dockerfile
       ├── .dockerignore
       └── ...
+
+
+in booking page - should be private
+1.grab routeId from url
+fetch endpoint get - /route/{routeId}
+{
+  "trainName": "Express 101",
+  "departureTime": "2026-08-05T08:00:00Z",
+  "stopOrder": [
+    {
+      order:0
+      station:{
+        id
+        name
+      }
+    },
+    {
+      order:2
+      station:{
+        id
+        name
+      }
+    }
+  ]
+}
+
+display train and route details in top
+
+need form with 3 fields
+1.from dropdown - select from stop order
+2.to dropdown - can select only order high station
+3.date - future date only.if current time > departure time today available
+all fields should be filled to available submit
+click on "check for seats"
+
+fetch Post /seats
+{
+  routeId,
+  from stationId
+  to stationId
+  selected date
+}
+response
+validation error 
+{
+  routeId:error
+  from:error
+  to:error
+  date:error
+}
+
+success-only seats available for users Journey 
+[
+  {
+    seat:{
+      id
+      number
+    }
+    coach:{
+      id:
+      number
+    }
+    classType{
+      id:
+      name:
+    }
+  }
+]
+
+priview as train and coach in screen 
+use defferent color for defferent classes
+categorize them in coach
+
+
+

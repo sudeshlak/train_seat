@@ -55,7 +55,7 @@ export default function BookingsPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h2 className="text-3xl font-bold text-gray-900 mb-6">My Bookings</h2>
-        
+
         {bookings.length === 0 ? (
           <div className="bg-white rounded-lg shadow-md p-8 text-center">
             <p className="text-gray-600">No bookings found.</p>
@@ -82,7 +82,8 @@ export default function BookingsPage() {
                       {booking.from} → {booking.to}
                     </p>
                     <p className="text-gray-500 text-sm mt-2">
-                      Departure: {booking.departure} | Arrival: {booking.arrival}
+                      Departure: {booking.departure} | Arrival:{" "}
+                      {booking.arrival}
                     </p>
                     <p className="text-gray-500 text-sm mt-1">
                       Date: {booking.date} | Seat: {booking.seat}
