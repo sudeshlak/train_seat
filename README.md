@@ -38,7 +38,7 @@ Web Application:
 
 3.RDBMS
 
-3.1. Why mySQl not mongoDB
+3.1.Why mySQl not mongoDB
 
 3.2.EER
   - https://www.figma.com/board/gF6ymVRoJtJK7uarVWjtK0/Entity-relationship--ER--Diagram--Community-?node-id=303-741&t=noQg0OhxDkVo5KBG-1
