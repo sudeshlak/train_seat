@@ -26,6 +26,9 @@ public class Coach extends BaseEntity {
 	@Column(name = "coach_number", nullable = false)
 	private Integer number;
 
+	@Column(name = "online_bookable", nullable = false)
+	private boolean onlineBookable;
+
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "train_id", nullable = false)
 	@ToString.Exclude

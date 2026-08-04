@@ -1,6 +1,5 @@
 package com.train_seat.api.repository;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,8 +19,9 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
 			JOIN FETCH s.coach c
 			JOIN FETCH c.classType
 			WHERE c.train.id = :trainId
+			  AND c.onlineBookable = true
 			""")
-	List<Seat> findAllByTrainIdWithCoachAndClassType(@Param("trainId") Long trainId);
+	List<Seat> findOnlineBookableByTrainIdWithCoachAndClassType(@Param("trainId") Long trainId);
 
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("""
