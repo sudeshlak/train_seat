@@ -3,10 +3,12 @@ import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import authReducer from "./slices/authSlice";
 import trainReducer from "./slices/trainSlice";
+import bookingReducer from "./slices/bookingSlice";
 
 const rootReducer = combineReducers({
   auth: authReducer,
   train: trainReducer,
+  booking: bookingReducer,
 });
 
 const persistConfig = {
