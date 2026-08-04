@@ -35,6 +35,11 @@ public class GlobalExceptionHandler {
 		return build(HttpStatus.CONFLICT, ex.getMessage(), null);
 	}
 
+	@ExceptionHandler(SeatUnavailableException.class)
+	public ResponseEntity<Map<String, Object>> handleSeatUnavailable(SeatUnavailableException ex) {
+		return build(HttpStatus.CONFLICT, ex.getMessage(), null);
+	}
+
 	@ExceptionHandler(ResourceNotFoundException.class)
 	public ResponseEntity<Map<String, Object>> handleNotFound(ResourceNotFoundException ex) {
 		return build(HttpStatus.NOT_FOUND, ex.getMessage(), null);
