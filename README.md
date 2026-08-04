@@ -9,7 +9,7 @@ Backlog
 Build setup
   - Up mySQL server in local machine
   - Create .env same as .env.example and fill it
-  - In root folder hit command : docker composer up --build
+  - In root folder hit command : docker compose up --build
   
 ---------------------------------------------------
 1. Back-end
