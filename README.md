@@ -1,9 +1,15 @@
 # train_seat
 Web Application: 
-  -Online seat booking system for Sri-Lanka most popular train route Colombo-> Ella
 
-  -Backlog
+Online seat booking system for Sri-Lanka most popular train route Colombo-> Ella
+
+Backlog
   https://swelikotuwa-1780299583842.atlassian.net/jira/software/projects/TS/boards/34/backlog?selectedIssue=TS-2&atlOrigin=eyJpIjoiMzM4ZGNmYzQ4MWQyNDI2ZWJiOTNmZGVjM2Y0MGFiYjUiLCJwIjoiaiJ9
+
+ Build setup
+  - Up mySQL server in local machime
+  - Create .env by referencing .env.example
+  - In root folder hit command : docker composer up --build
 
   
 ---------------------------------------------------
@@ -38,9 +44,24 @@ Web Application:
 
 3.RDBMS
 
-3.1. Why mySQl not mongoDB
+3.1.Why mySQl not mongoDB
 
 3.2.EER
-  - https://www.figma.com/board/gF6ymVRoJtJK7uarVWjtK0/Entity-relationship--ER--Diagram--Community-?node-id=303-741&t=noQg0OhxDkVo5KBG-1
+  - https://www.figma.com/board/gF6ymVRoJtJK7uarVWjtK0/Entity-relationship--ER--Diagram--Community-?      node-id=303-741&t=noQg0OhxDkVo5KBG-1
 
+---------------------------------------------------
 
+4.Containerizing
+4.1.
+  train_seat/
+  ├── docker-compose.yml
+  ├── .env                 # gitignored — secrets
+  ├── .env.example         # committed — template
+  ├── be/
+  │   ├── Dockerfile
+  │   ├── .dockerignore
+  │   └── src/main/resources/application.yaml
+  └── fe/
+      ├── Dockerfile
+      ├── .dockerignore
+      └── ...
