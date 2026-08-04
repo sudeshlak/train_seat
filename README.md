@@ -11,7 +11,9 @@ Build setup
   - Up mySQL server in local machine
   - Create .env same as .env.example and fill it
   - In root folder hit command : docker compose up --build
-  
+  - If Flyway migrations were rewritten (schema/seed change), reset the DB first:
+    `docker compose down -v` then `docker compose up --build`
+    (or drop/recreate the MySQL `train_seat` database) 
 ---------------------------------------------------
 1. Back-end
 

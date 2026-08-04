@@ -67,16 +67,17 @@ INSERT INTO stop_orders (id, stop_sequence, route_id, station_id, created_at, up
     (25, 25, 1, 25, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6), NULL),
     (26, 26, 1, 26, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6), NULL);
 
--- Coach 1: 1st class (20 seats); 2–3: 2nd class (50 each); 4–8: 3rd class (50 each)
-INSERT INTO coaches (id, coach_number, train_id, class_type_id, created_at, updated_at, deleted_at) VALUES
-    (1, 1, 1, 1, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6), NULL),
-    (2, 2, 1, 2, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6), NULL),
-    (3, 3, 1, 2, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6), NULL),
-    (4, 4, 1, 3, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6), NULL),
-    (5, 5, 1, 3, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6), NULL),
-    (6, 6, 1, 3, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6), NULL),
-    (7, 7, 1, 3, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6), NULL),
-    (8, 8, 1, 3, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6), NULL);
+-- Online bookable: 1=1st, 2=2nd, 3=3rd. Coaches 4–8 offline inventory (3rd class).
+-- Seat counts: coach 1 -> 20; coaches 2–8 -> 50 each
+INSERT INTO coaches (id, coach_number, train_id, class_type_id, online_bookable, created_at, updated_at, deleted_at) VALUES
+    (1, 1, 1, 1, TRUE,  CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6), NULL),
+    (2, 2, 1, 2, TRUE,  CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6), NULL),
+    (3, 3, 1, 3, TRUE,  CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6), NULL),
+    (4, 4, 1, 3, FALSE, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6), NULL),
+    (5, 5, 1, 3, FALSE, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6), NULL),
+    (6, 6, 1, 3, FALSE, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6), NULL),
+    (7, 7, 1, 3, FALSE, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6), NULL),
+    (8, 8, 1, 3, FALSE, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6), NULL);
 
 -- Seats: coach 1 -> 1..20; coaches 2..8 -> 1..50
 INSERT INTO seats (seat_number, coach_id, created_at, updated_at, deleted_at)

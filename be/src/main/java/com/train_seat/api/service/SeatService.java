@@ -44,7 +44,7 @@ public class SeatService {
 		int fromSeq = journey.fromStop().getStopSequence();
 		int toSeq = journey.toStop().getStopSequence();
 
-		List<Seat> seats = seatRepository.findAllByTrainIdWithCoachAndClassType(trainId);
+		List<Seat> seats = seatRepository.findOnlineBookableByTrainIdWithCoachAndClassType(trainId);
 		List<Booking> bookings = bookingRepository.findByTravelDateAndTrainIdWithStops(
 				request.getDate(), trainId);
 

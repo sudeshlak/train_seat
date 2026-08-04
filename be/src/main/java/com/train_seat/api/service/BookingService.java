@@ -72,6 +72,12 @@ public class BookingService {
 			throw new ValidationException(errors);
 		}
 
+		if (!seat.getCoach().isOnlineBookable()) {
+			Map<String, String> errors = new HashMap<>();
+			errors.put("seatId", "Seat is not available for online booking");
+			throw new ValidationException(errors);
+		}
+
 		int fromSeq = fromStop.getStopSequence();
 		int toSeq = toStop.getStopSequence();
 

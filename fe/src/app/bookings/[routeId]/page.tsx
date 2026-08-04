@@ -464,9 +464,12 @@ export default function BookingPage() {
 
             {seats.length > 0 && (
               <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                <h3 className="text-xl font-semibold text-gray-900 mb-1">
                   Available Seats
                 </h3>
+                <p className="text-sm text-gray-500 mb-4">
+                  Only online-bookable coaches are shown.
+                </p>
                 {Object.entries(seatsByCoach).map(
                   ([coachNumber, coachSeats]) => (
                     <div key={coachNumber} className="mb-6">
