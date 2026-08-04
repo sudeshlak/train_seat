@@ -1,9 +1,11 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import {
   RouteDetails,
   SeatWithDetails,
   SeatRequest,
   SeatValidationError,
+  BookSeatRequest,
+  BookingResponse,
 } from "../../types/train";
 import { trainApi } from "../../api/trainApi";
 import { getApiError, ErrorType } from "../../api/errors";
@@ -13,6 +15,12 @@ interface BookingState {
   seats: SeatWithDetails[];
   loading: boolean;
   seatsLoading: boolean;
+  bookingLoading: boolean;
+  bookingSuccess: { message: string; amount: number } | null;
+  bookingConflict: string | null;
+  unavailableSeatIds: number[];
+  myBookings: BookingResponse[];
+  myBookingsLoading: boolean;
   error: string | null;
   validationErrors: SeatValidationError;
   globalError: {
@@ -26,6 +34,12 @@ const initialState: BookingState = {
   seats: [],
   loading: false,
   seatsLoading: false,
+  bookingLoading: false,
+  bookingSuccess: null,
+  bookingConflict: null,
+  unavailableSeatIds: [],
+  myBookings: [],
+  myBookingsLoading: false,
   error: null,
   validationErrors: {},
   globalError: null,
@@ -82,6 +96,39 @@ export const fetchSeatsThunk = createAsyncThunk(
   },
 );
 
+export const bookSeatThunk = createAsyncThunk(
+  "booking/bookSeat",
+  async (request: BookSeatRequest, { rejectWithValue }) => {
+    try {
+      const { data } = await trainApi.bookSeat(request);
+      return data;
+    } catch (error) {
+      const apiError = getApiError(error);
+      return rejectWithValue({
+        type: apiError.type,
+        message: apiError.message,
+        seatId: request.seatId,
+      } as const);
+    }
+  },
+);
+
+export const fetchMyBookingsThunk = createAsyncThunk(
+  "booking/fetchMyBookings",
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data } = await trainApi.getBookings();
+      return data.bookings;
+    } catch (error) {
+      const apiError = getApiError(error);
+      return rejectWithValue({
+        type: apiError.type,
+        message: apiError.message,
+      } as const);
+    }
+  },
+);
+
 const bookingSlice = createSlice({
   name: "booking",
   initialState,
@@ -97,6 +144,20 @@ const bookingSlice = createSlice({
     },
     clearSeats(state) {
       state.seats = [];
+    },
+    clearBookingSuccess(state) {
+      state.bookingSuccess = null;
+    },
+    clearBookingConflict(state) {
+      state.bookingConflict = null;
+    },
+    markSeatUnavailable(state, action: PayloadAction<number>) {
+      if (!state.unavailableSeatIds.includes(action.payload)) {
+        state.unavailableSeatIds.push(action.payload);
+      }
+    },
+    clearUnavailableSeats(state) {
+      state.unavailableSeatIds = [];
     },
   },
   extraReducers: (builder) => {
@@ -142,6 +203,10 @@ const bookingSlice = createSlice({
         state.error = null;
         state.validationErrors = {};
         state.globalError = null;
+        const availableIds = new Set(action.payload.map((s) => s.seat.id));
+        state.unavailableSeatIds = state.unavailableSeatIds.filter((id) =>
+          availableIds.has(id),
+        );
       })
       .addCase(fetchSeatsThunk.rejected, (state, action) => {
         state.seatsLoading = false;
@@ -173,6 +238,65 @@ const bookingSlice = createSlice({
             message: "Failed to fetch seats",
           };
         }
+      })
+      .addCase(bookSeatThunk.pending, (state) => {
+        state.bookingLoading = true;
+        state.bookingConflict = null;
+        state.bookingSuccess = null;
+        state.globalError = null;
+      })
+      .addCase(bookSeatThunk.fulfilled, (state, action) => {
+        state.bookingLoading = false;
+        state.bookingSuccess = {
+          message: action.payload.message ?? "Booking confirmed",
+          amount: action.payload.amount,
+        };
+        if (!state.unavailableSeatIds.includes(action.payload.seat.id)) {
+          state.unavailableSeatIds.push(action.payload.seat.id);
+        }
+      })
+      .addCase(bookSeatThunk.rejected, (state, action) => {
+        state.bookingLoading = false;
+        const payload = action.payload as
+          | { type: ErrorType; message: string; seatId?: number }
+          | undefined;
+        if (payload?.type === ErrorType.CONFLICT) {
+          state.bookingConflict = payload.message;
+          if (
+            payload.seatId != null &&
+            !state.unavailableSeatIds.includes(payload.seatId)
+          ) {
+            state.unavailableSeatIds.push(payload.seatId);
+          }
+        } else if (payload) {
+          state.globalError = {
+            type: payload.type,
+            message: payload.message,
+          };
+        } else {
+          state.globalError = {
+            type: ErrorType.UNKNOWN,
+            message: "Failed to book seat",
+          };
+        }
+      })
+      .addCase(fetchMyBookingsThunk.pending, (state) => {
+        state.myBookingsLoading = true;
+        state.globalError = null;
+      })
+      .addCase(fetchMyBookingsThunk.fulfilled, (state, action) => {
+        state.myBookingsLoading = false;
+        state.myBookings = action.payload;
+      })
+      .addCase(fetchMyBookingsThunk.rejected, (state, action) => {
+        state.myBookingsLoading = false;
+        const payload = action.payload as
+          | { type: ErrorType; message: string }
+          | undefined;
+        state.globalError = payload ?? {
+          type: ErrorType.UNKNOWN,
+          message: "Failed to fetch bookings",
+        };
       });
   },
 });
@@ -182,5 +306,9 @@ export const {
   clearValidationErrors,
   clearGlobalError: clearBookingGlobalError,
   clearSeats,
+  clearBookingSuccess,
+  clearBookingConflict,
+  markSeatUnavailable,
+  clearUnavailableSeats,
 } = bookingSlice.actions;
 export default bookingSlice.reducer;
