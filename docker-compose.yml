@@ -1,0 +1,21 @@
+services:
+  be:
+    build: ./be
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # helpful on Linux; fine on Mac too
+
+  fe:
+    build:
+      context: ./fe
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - be
