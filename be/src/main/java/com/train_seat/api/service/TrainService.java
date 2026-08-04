@@ -44,6 +44,7 @@ public class TrainService {
 		String to = stopStations.isEmpty() ? "" : stopStations.get(stopStations.size() - 1);
 
 		return new TrainResponse(
+				route.getId(),
 				route.getTrain().getName(),
 				route.getTime().format(DEPARTURE_TIME),
 				from,
