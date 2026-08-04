@@ -35,6 +35,16 @@ public class GlobalExceptionHandler {
 		return build(HttpStatus.CONFLICT, ex.getMessage(), null);
 	}
 
+	@ExceptionHandler(ResourceNotFoundException.class)
+	public ResponseEntity<Map<String, Object>> handleNotFound(ResourceNotFoundException ex) {
+		return build(HttpStatus.NOT_FOUND, ex.getMessage(), null);
+	}
+
+	@ExceptionHandler(ValidationException.class)
+	public ResponseEntity<Map<String, Object>> handleValidationException(ValidationException ex) {
+		return build(HttpStatus.BAD_REQUEST, "Validation failed", ex.getFieldErrors());
+	}
+
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
 		return build(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), null);

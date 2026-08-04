@@ -1,4 +1,4 @@
-package com.train_seat.api.dto.train;
+package com.train_seat.api.dto.route;
 
 import java.util.List;
 
@@ -9,12 +9,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TrainResponse {
+public class RouteDetailResponse {
 
-	private Long routeId;
 	private String trainName;
 	private String departureTime;
-	private String from;
-	private String to;
-	private List<String> stopStations;
+	private List<StopOrderResponse> stopOrder;
 }
