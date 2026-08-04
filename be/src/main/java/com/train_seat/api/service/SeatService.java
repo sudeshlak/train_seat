@@ -44,7 +44,7 @@ public class SeatService {
 		int fromSeq = journey.fromStop().getStopSequence();
 		int toSeq = journey.toStop().getStopSequence();
 
-		List<Seat> seats = seatRepository.findAllByTrainIdWithCoachAndClassType(trainId);
+		List<Seat> seats = seatRepository.findOnlineBookableByTrainIdWithCoachAndClassType(trainId);
 		List<Booking> bookings = bookingRepository.findByTravelDateAndTrainIdWithStops(
 				request.getDate(), trainId);
 
@@ -58,19 +58,19 @@ public class SeatService {
 		}
 
 		return seats.stream()
-				.filter(seat -> !occupiedSeatIds.contains(seat.getId()))
 				.sorted(Comparator
 						.comparing((Seat seat) -> seat.getCoach().getNumber())
 						.thenComparing(Seat::getNumber))
-				.map(this::toAvailableSeatResponse)
+				.map(seat -> toAvailableSeatResponse(seat, !occupiedSeatIds.contains(seat.getId())))
 				.toList();
 	}
 
-	private AvailableSeatResponse toAvailableSeatResponse(Seat seat) {
+	private AvailableSeatResponse toAvailableSeatResponse(Seat seat, boolean available) {
 		Coach coach = seat.getCoach();
 		return new AvailableSeatResponse(
 				new SeatSummary(seat.getId(), seat.getNumber()),
 				new CoachSummary(coach.getId(), coach.getNumber()),
-				new ClassTypeSummary(coach.getClassType().getId(), coach.getClassType().getName()));
+				new ClassTypeSummary(coach.getClassType().getId(), coach.getClassType().getName()),
+				available);
 	}
 }

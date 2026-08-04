@@ -46,13 +46,14 @@ CREATE TABLE routes (
 );
 
 CREATE TABLE coaches (
-    id             BIGINT AUTO_INCREMENT PRIMARY KEY,
-    coach_number   INT          NOT NULL,
-    train_id       BIGINT       NOT NULL,
-    class_type_id  BIGINT       NOT NULL,
-    created_at     DATETIME(6)  NOT NULL,
-    updated_at     DATETIME(6)  NOT NULL,
-    deleted_at     DATETIME(6)  NULL,
+    id               BIGINT AUTO_INCREMENT PRIMARY KEY,
+    coach_number     INT          NOT NULL,
+    train_id         BIGINT       NOT NULL,
+    class_type_id    BIGINT       NOT NULL,
+    online_bookable  BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_at       DATETIME(6)  NOT NULL,
+    updated_at       DATETIME(6)  NOT NULL,
+    deleted_at       DATETIME(6)  NULL,
     CONSTRAINT fk_coaches_train FOREIGN KEY (train_id) REFERENCES trains (id),
     CONSTRAINT fk_coaches_class_type FOREIGN KEY (class_type_id) REFERENCES class_types (id)
 );
