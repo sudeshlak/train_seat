@@ -61,3 +61,30 @@ export interface SeatValidationError {
   to?: string;
   date?: string;
 }
+
+export interface BookSeatRequest {
+  routeId: number;
+  seatId: number;
+  from: number;
+  to: number;
+  date: string;
+}
+
+export interface BookingResponse {
+  id: number;
+  status: string;
+  amount: number;
+  date: string;
+  trainName: string;
+  routeId: number;
+  seat: Seat;
+  coach: Coach;
+  classType: ClassType;
+  fromStation: Station;
+  toStation: Station;
+  message?: string | null;
+}
+
+export interface BookingsResponse {
+  bookings: BookingResponse[];
+}
