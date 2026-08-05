@@ -40,11 +40,14 @@ Build setup
   - Good tooling and easy to run next to the API
 
 2.2. Three layers
-- UI (pages + components)
-          ↓ user clicks / types
-  Services (business rules)
-          ↓ calls
-  API layer (Axios + error handling)
+
+```text
+UI (pages + components)
+        ↓ user clicks / types
+Services (business rules)
+        ↓ calls
+API layer (Axios + error handling)
+```
 
 2.3.At first I tried to add extra layer "viewModel" to handle state updates but when it was added it didn't help to explain component behavior.
 So I removed it
@@ -70,18 +73,21 @@ So I removed it
 ---------------------------------------------------
 4.Containerizing
 4.1. To up app with simple command
-  train_seat/
-  ├── docker-compose.yml
-  ├── .env                 # gitignored — secrets
-  ├── .env.example         # committed — template
-  ├── be/
-  │   ├── Dockerfile
-  │   ├── .dockerignore
-  │   └── src/main/resources/application.yaml
-  └── fe/
-      ├── Dockerfile
-      ├── .dockerignore
-      └── ...
+
+```text
+train_seat/
+├── docker-compose.yml
+├── .env                 # gitignored — secrets
+├── .env.example         # committed — template
+├── be/
+│   ├── Dockerfile
+│   ├── .dockerignore
+│   └── src/main/resources/application.yaml
+└── fe/
+    ├── Dockerfile
+    ├── .dockerignore
+    └── ...
+```
 
 ---------------------------------------------------
 5.Challenges
@@ -94,23 +100,25 @@ So I removed it
 
   So added table called "fare".
 
-  journey  price  class
-  a->b     10     1
-  a->c     15     1
-  b->c     12     1
-  a->b     15     2
-  a->c     20     2
-  b->c     17     2
+| journey | price | class |
+|---------|-------|-------|
+| a->b    | 10    | 1     |
+| a->c    | 15    | 1     |
+| b->c    | 12    | 1     |
+| a->b    | 15    | 2     |
+| a->c    | 20    | 2     |
+| b->c    | 17    | 2     |
 
 5.2. Store station order
   When considering train route there are stops but there is an order. Simply cannot add relationship with train station. So added extra table called "StopOrder". Helped to search available seats for chosen journey
 
   Assume route -> a->b->c
 
-  station  order
-  a        0
-  b        1
-  c        3
+| station | order |
+|---------|-------|
+| a       | 0     |
+| b       | 1     |
+| c       | 3     |
 
 5.3. Price and currency
   For simplicity kept price as decimal number. But I think it should be stored along with currency type(ex:LKR)
