@@ -1,26 +1,9 @@
 "use client";
 
-import { useAppSelector } from "@/store/hooks";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { withAuth } from "@/components/auth/withAuth";
 
-export default function BookingsLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.replace("/login");
-    }
-  }, [isAuthenticated, router]);
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
+function BookingsLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
+
+export default withAuth(BookingsLayout);
