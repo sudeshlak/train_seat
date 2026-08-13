@@ -1,28 +1,14 @@
-"use client";
-
-import { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchTrainsThunk } from "@/store/slices/trainSlice";
+import NavBar from "@/components/ui/NavBar";
+import { trainService } from "@/services/trainService";
+import { formatDepartureTime } from "@/utils/departureTime";
 import Link from "next/link";
 
-export default function HomePage() {
-  const dispatch = useAppDispatch();
-  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
-  const { trains, loading } = useAppSelector((state) => state.train);
+export const dynamic = "force-static";
 
-  useEffect(() => {
-    dispatch(fetchTrainsThunk());
-  }, [dispatch]);
+export default async function HomePage() {
 
-  const formatDepartureTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-  };
-
+  const trains = await trainService.getTrains();
+  
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm">
@@ -33,49 +19,15 @@ export default function HomePage() {
                 Train Seat Booking
               </h1>
             </div>
-            <div className="flex items-center space-x-4">
-              {isAuthenticated ? (
-                <>
-                  <span className="text-gray-700">{user?.email}</span>
-                  <Link
-                    href="/bookings"
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
-                  >
-                    My Bookings
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    className="text-gray-700 hover:text-gray-900"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    href="/signup"
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
-                  >
-                    Sign Up
-                  </Link>
-                </>
-              )}
-            </div>
+            <NavBar/>
           </div>
         </div>
       </nav>
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h2 className="text-3xl font-bold text-gray-900 mb-6">
           Available Trains
         </h2>
-
-        {loading ? (
-          <div className="text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-            <p className="mt-2 text-gray-600">Loading trains...</p>
-          </div>
-        ) : trains.length === 0 ? (
+        {trains.length === 0 ? (
           <div className="bg-white rounded-lg shadow-md p-8 text-center">
             <p className="text-gray-600">No trains available at the moment.</p>
           </div>
@@ -106,21 +58,12 @@ export default function HomePage() {
                     )}
                   </div>
                   <div className="ml-4">
-                    {isAuthenticated ? (
                       <Link
                         href={`/bookings/${train.routeId}`}
                         className="inline-block bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
                       >
                         Book Now
                       </Link>
-                    ) : (
-                      <Link
-                        href="/login"
-                        className="inline-block bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400"
-                      >
-                        Login to Book
-                      </Link>
-                    )}
                   </div>
                 </div>
               </div>
