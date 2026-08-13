@@ -1,8 +1,9 @@
 import axios from "axios";
 import { storageService } from "../services/storageService";
+import { getApiBaseUrl } from "./baseUrl";
 
 export const axiosClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: getApiBaseUrl(),
   headers: { "Content-Type": "application/json" },
 });
 

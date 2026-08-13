@@ -10,9 +10,11 @@ Build setup
   - Clone repo
   - Up MySQL server on local machine
   - Create .env same as .env.example and fill it
-  - In root folder hit command : docker compose up --build
+  - From the repo root: `./start.sh`
+    (starts BE, waits until :8080 is ready, SSG-builds FE, then starts FE)
+  - App: http://localhost:3000  API: http://localhost:8080
   - If Flyway migrations were rewritten (schema/seed change), reset the DB first:
-    `docker compose down -v` then `docker compose up --build`
+    `docker compose down -v` then `./start.sh`
     (or drop/recreate the MySQL `train_seat` database) 
 ---------------------------------------------------
 1. Back-end
@@ -72,7 +74,7 @@ So I removed it
 
 ---------------------------------------------------
 4.Containerizing
-4.1. To up app with simple command
+4.1. To up app with simple command (`./start.sh` — BE must be reachable on host :8080 before FE SSG build)
 
 ```text
 train_seat/
