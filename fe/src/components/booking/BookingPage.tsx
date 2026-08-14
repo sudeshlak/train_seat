@@ -17,7 +17,6 @@ import { BookingAlert } from "@/components/booking/BookingAlert";
 import { BookingResultBanner } from "@/components/booking/BookingResultBanner";
 import { RouteLoading } from "@/components/booking/RouteLoading";
 import { RouteNotFound } from "@/components/booking/RouteNotFound";
-import { RouteSummary } from "@/components/booking/RouteSummary";
 import { JourneyDetailsForm } from "@/components/booking/JourneyDetailsForm";
 import { SeatMap } from "@/components/booking/SeatMap";
 import { BookingPanel } from "@/components/booking/BookingPanel";
@@ -163,8 +162,6 @@ export function BookingPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <BookingNav />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {error && <BookingAlert message={error} />}
 
         <BookingResultBanner
@@ -176,8 +173,6 @@ export function BookingPage() {
         {validationErrors.routeId && (
           <BookingAlert message={validationErrors.routeId} />
         )}
-
-        <RouteSummary routeDetails={routeDetails} />
 
         <JourneyDetailsForm
           routeDetails={routeDetails}
@@ -221,7 +216,6 @@ export function BookingPage() {
             onConfirmBooking={confirmSeatBooking}
           />
         )}
-      </main>
     </div>
   );
 }
