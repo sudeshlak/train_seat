@@ -26,8 +26,6 @@ export function BookingPage() {
   const dispatch = useAppDispatch();
   const params = useParams();
   const routeId = params.routeId as string;
-
-  const { user } = useAppSelector((state) => state.auth);
   const {
     routeDetails,
     seats,
@@ -151,7 +149,7 @@ export function BookingPage() {
   if (!routeDetails) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <BookingNav userEmail={user?.email ?? ""} />
+        <BookingNav />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {error && <BookingAlert message={error} />}
           {validationErrors.routeId && (
@@ -165,8 +163,7 @@ export function BookingPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <BookingNav userEmail={user?.email ?? ""} />
-
+      <BookingNav />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {error && <BookingAlert message={error} />}
 
