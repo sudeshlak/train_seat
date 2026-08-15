@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   fetchRouteThunk,
@@ -23,6 +23,7 @@ import { BookingPanel } from "@/components/booking/BookingPanel";
 
 export function BookingPage() {
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const params = useParams();
   const routeId = params.routeId as string;
   const {
@@ -37,6 +38,7 @@ export function BookingPage() {
     error,
     validationErrors,
   } = useAppSelector((state) => state.booking);
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   const [fromStationId, setFromStationId] = useState("");
   const [toStationId, setToStationId] = useState("");
@@ -117,6 +119,11 @@ export function BookingPage() {
       !unavailableSeatIds.includes(selectedSeat.seat.id);
 
     if (!canConfirmBooking) {
+      return;
+    }
+
+    if (!isAuthenticated) {
+      router.push("/login");
       return;
     }
 
