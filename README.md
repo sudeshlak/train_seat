@@ -112,15 +112,15 @@ train_seat/
 | b->c    | 17    | 2     |
 
 5.2. Store station order
-  When considering train route there are stops but there is an order. Simply cannot add relationship with train station. So added extra table called "StopOrder". Helped to search available seats for chosen journey
+When considering train route there are stops but there is an order. Simply cannot add relationship with train station. So added extra table called "StopOrder". Helped to search available seats for chosen journey
 
-  Assume route -> a->b->c
+  Assume route > a->b->c
 
 | station | order |
 |---------|-------|
 | a       | 0     |
 | b       | 1     |
-| c       | 3     |
+| c       | 2     |
 
 5.3. Price and currency
   For simplicity kept price as decimal number. But I think it should be stored along with currency type(ex:LKR)
