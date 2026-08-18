@@ -2,7 +2,6 @@ import { BookingNav } from "@/components/booking/BookingNav";
 import { BookingPage } from "@/components/booking/BookingPage";
 import { RouteSummary } from "@/components/booking/RouteSummary";
 import { trainService } from "@/services/trainService";
-import { Suspense } from "react";
 
 export async function generateStaticParams() {
   const routes = await trainService.avaialableRoutes();

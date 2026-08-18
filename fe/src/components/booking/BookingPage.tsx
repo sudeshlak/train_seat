@@ -20,6 +20,7 @@ import { RouteNotFound } from "@/components/booking/RouteNotFound";
 import { JourneyDetailsForm } from "@/components/booking/JourneyDetailsForm";
 import { SeatMap } from "@/components/booking/SeatMap";
 import { BookingPanel } from "@/components/booking/BookingPanel";
+import { bumpRouteClick } from "@/utils/cookie";
 
 export function BookingPage() {
   const dispatch = useAppDispatch();
@@ -51,6 +52,7 @@ export function BookingPage() {
   useEffect(() => {
     if (routeId) {
       dispatch(fetchRouteThunk(routeId));
+      bumpRouteClick(Number(routeId));
     }
   }, [dispatch, routeId]);
 

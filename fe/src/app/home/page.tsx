@@ -1,13 +1,18 @@
+import { FrequentRoutes } from "@/components/home/FrequentRoutes";
 import NavBar from "@/components/ui/NavBar";
 import { trainService } from "@/services/trainService";
 import { formatDepartureTime } from "@/utils/departureTime";
 import Link from "next/link";
+import { Suspense } from "react";
 
-export const dynamic = "force-static";
+async function getTrains() {
+  "use cache";
+  return trainService.getTrains();
+}
 
 export default async function HomePage() {
 
-  const trains = await trainService.getTrains();
+  const trains = await getTrains();
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -24,6 +29,9 @@ export default async function HomePage() {
         </div>
       </nav>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Suspense fallback={<span>Loading</span>}>
+          <FrequentRoutes/>
+        </Suspense>
         <h2 className="text-3xl font-bold text-gray-900 mb-6">
           Available Trains
         </h2>
