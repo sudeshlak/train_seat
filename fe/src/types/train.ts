@@ -86,6 +86,10 @@ export interface BookingResponse {
   message?: string | null;
 }
 
+export interface AvailableRoutesResponse {
+  routes: number[];
+}
+
 export interface BookingsResponse {
   bookings: BookingResponse[];
 }

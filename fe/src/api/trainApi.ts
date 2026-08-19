@@ -7,10 +7,12 @@ import {
   BookSeatRequest,
   BookingResponse,
   BookingsResponse,
+  AvailableRoutesResponse,
 } from "../types/train";
 
 export const trainApi = {
   getTrains: () => axiosClient.get<TrainsResponse>("/trains"),
+  getAvailableRoutes: () => axiosClient.get<AvailableRoutesResponse>("/route/available"),
   getRoute: (routeId: string | number) =>
     axiosClient.get<RouteDetails>(`/route/${routeId}`),
   getSeats: (seatRequest: SeatRequest) =>

@@ -1,14 +1,15 @@
-"use client";
-
 import { Fragment } from "react";
-import { RouteDetails } from "@/types/train";
 import { formatDepartureTime } from "@/utils/departureTime";
+import { trainService } from "@/services/trainService";
 
 interface RouteSummaryProps {
-  routeDetails: RouteDetails;
+  params:Promise<{routeId: number}>
 }
 
-export function RouteSummary({ routeDetails }: RouteSummaryProps) {
+export async function RouteSummary({ params }: RouteSummaryProps) {
+  const { routeId } = await params;
+  const routeDetails = await trainService.getRoute(routeId);
+
   const formattedDeparture = formatDepartureTime(routeDetails.departureTime);
   const lastStopIndex = routeDetails.stopOrder.length - 1;
 
