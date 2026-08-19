@@ -3,12 +3,17 @@ import { formatDepartureTime } from "@/utils/departureTime";
 import { trainService } from "@/services/trainService";
 
 interface RouteSummaryProps {
-  params:Promise<{routeId: number}>
+  params:Promise<{routeId: string}>
+}
+
+const getRouteDetails = async (routeId:string)=>{
+    'use cache'
+     return await trainService.getRoute(routeId);
 }
 
 export async function RouteSummary({ params }: RouteSummaryProps) {
   const { routeId } = await params;
-  const routeDetails = await trainService.getRoute(routeId);
+  const routeDetails = await getRouteDetails(routeId);
 
   const formattedDeparture = formatDepartureTime(routeDetails.departureTime);
   const lastStopIndex = routeDetails.stopOrder.length - 1;

@@ -65,12 +65,18 @@ export default async function HomePage() {
                       </div>
                     )}
                   </div>
-                  <div className="ml-4">
+                  <div className="ml-4 flex flex-col gap-2">
                       <Link
                         href={`/bookings/${train.routeId}`}
-                        className="inline-block bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+                        className="inline-block bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 text-center"
                       >
                         Book Now
+                      </Link>
+                      <Link
+                        href={`/seats/${train.routeId}`}
+                        className="inline-block border border-indigo-600 text-indigo-600 px-4 py-2 rounded-md hover:bg-indigo-50 text-center"
+                      >
+                        Seat Plan
                       </Link>
                   </div>
                 </div>
