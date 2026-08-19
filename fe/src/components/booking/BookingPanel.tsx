@@ -1,6 +1,6 @@
 "use client";
 
-import { RouteDetails, SeatWithDetails } from "@/types/train";
+import { RouteDetails, SeatWithAvailability } from "@/types/train";
 import { BookingResultBanner } from "@/components/booking/BookingResultBanner";
 
 interface BookingSuccessSummary {
@@ -10,7 +10,7 @@ interface BookingSuccessSummary {
 
 interface BookingPanelProps {
   routeDetails: RouteDetails;
-  selectedSeat: SeatWithDetails | null;
+  selectedSeat: SeatWithAvailability | null;
   fromStationId: string;
   toStationId: string;
   travelDate: string;

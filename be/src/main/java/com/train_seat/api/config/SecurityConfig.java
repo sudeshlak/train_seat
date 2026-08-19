@@ -61,6 +61,9 @@ public class SecurityConfig {
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers(HttpMethod.POST, "/auth/login", "/auth/signup").permitAll()
 						.requestMatchers(HttpMethod.GET, "/trains").permitAll()
+						.requestMatchers(HttpMethod.GET, "/route/available", "/route/{routeId}").permitAll()
+						.requestMatchers(HttpMethod.GET,"/seatPlan/{routeId}","/todayBooked/{routeId}").permitAll()
+						.requestMatchers(HttpMethod.POST, "/seats").permitAll()
 						.requestMatchers(
 								"/swagger-ui/**",
 								"/swagger-ui.html",

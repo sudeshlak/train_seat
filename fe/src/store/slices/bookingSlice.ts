@@ -1,18 +1,18 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import {
   RouteDetails,
-  SeatWithDetails,
+  SeatWithAvailability,
   SeatRequest,
   SeatValidationError,
   BookSeatRequest,
   BookingResponse,
 } from "../../types/train";
-import { trainApi } from "../../api/trainApi";
 import { getApiError, ErrorType } from "../../api/errors";
+import { trainService } from "@/services/trainService";
 
 interface BookingState {
   routeDetails: RouteDetails | null;
-  seats: SeatWithDetails[];
+  seats: SeatWithAvailability[];
   loading: boolean;
   seatsLoading: boolean;
   bookingLoading: boolean;
@@ -59,10 +59,9 @@ function pickSeatValidationErrors(
 
 export const fetchRouteThunk = createAsyncThunk(
   "booking/fetchRoute",
-  async (routeId: string, { rejectWithValue }) => {
+  async (routeId: string | number, { rejectWithValue }) => {
     try {
-      const { data } = await trainApi.getRoute(routeId);
-      return data;
+      return await trainService.getRoute(routeId);
     } catch (error) {
       const apiError = getApiError(error);
       return rejectWithValue({
@@ -77,8 +76,7 @@ export const fetchSeatsThunk = createAsyncThunk(
   "booking/fetchSeats",
   async (seatRequest: SeatRequest, { rejectWithValue }) => {
     try {
-      const { data } = await trainApi.getSeats(seatRequest);
-      return data;
+      return await trainService.getSeats(seatRequest);
     } catch (error) {
       const apiError = getApiError(error);
       if (apiError.type === ErrorType.VALIDATION) {
@@ -100,8 +98,7 @@ export const bookSeatThunk = createAsyncThunk(
   "booking/bookSeat",
   async (request: BookSeatRequest, { rejectWithValue }) => {
     try {
-      const { data } = await trainApi.bookSeat(request);
-      return data;
+      return await trainService.bookSeat(request);
     } catch (error) {
       const apiError = getApiError(error);
       return rejectWithValue({
@@ -117,8 +114,7 @@ export const fetchMyBookingsThunk = createAsyncThunk(
   "booking/fetchMyBookings",
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await trainApi.getBookings();
-      return data.bookings;
+      return await trainService.getBookings();
     } catch (error) {
       const apiError = getApiError(error);
       return rejectWithValue({

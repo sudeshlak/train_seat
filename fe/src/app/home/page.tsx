@@ -1,13 +1,18 @@
+import { FrequentRoutes } from "@/components/home/FrequentRoutes";
 import NavBar from "@/components/ui/NavBar";
 import { trainService } from "@/services/trainService";
 import { formatDepartureTime } from "@/utils/departureTime";
 import Link from "next/link";
+import { Suspense } from "react";
 
-export const dynamic = "force-static";
+async function getTrains() {
+  "use cache";
+  return trainService.getTrains();
+}
 
 export default async function HomePage() {
 
-  const trains = await trainService.getTrains();
+  const trains = await getTrains();
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -24,6 +29,9 @@ export default async function HomePage() {
         </div>
       </nav>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Suspense fallback={<span>Loading</span>}>
+          <FrequentRoutes/>
+        </Suspense>
         <h2 className="text-3xl font-bold text-gray-900 mb-6">
           Available Trains
         </h2>
@@ -57,12 +65,18 @@ export default async function HomePage() {
                       </div>
                     )}
                   </div>
-                  <div className="ml-4">
+                  <div className="ml-4 flex flex-col gap-2">
                       <Link
                         href={`/bookings/${train.routeId}`}
-                        className="inline-block bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+                        className="inline-block bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 text-center"
                       >
                         Book Now
+                      </Link>
+                      <Link
+                        href={`/seats/${train.routeId}`}
+                        className="inline-block border border-indigo-600 text-indigo-600 px-4 py-2 rounded-md hover:bg-indigo-50 text-center"
+                      >
+                        Seat Plan
                       </Link>
                   </div>
                 </div>
