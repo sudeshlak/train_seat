@@ -1,8 +1,8 @@
-import { SeatWithDetails } from "@/types/train";
+import { SeatDetails, SeatWithAvailability } from "@/types/train";
 
-export function groupSeatsByCoach(
-  seats: SeatWithDetails[],
-): Record<string, SeatWithDetails[]> {
+export function groupSeatsByCoach<T extends SeatDetails>(
+  seats: T[],
+): Record<string, T[]> {
   return seats.reduce(
     (acc, seat) => {
       const coachNumber = String(seat.coach.number);
@@ -12,12 +12,12 @@ export function groupSeatsByCoach(
       acc[coachNumber].push(seat);
       return acc;
     },
-    {} as Record<string, SeatWithDetails[]>,
+    {} as Record<string, T[]>,
   );
 }
 
 export function isSeatSelectable(
-  seat: SeatWithDetails,
+  seat: SeatWithAvailability,
   seatsStale: boolean,
   unavailableSeatIds: number[],
 ): boolean {

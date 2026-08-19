@@ -8,7 +8,7 @@ export async function generateStaticParams() {
   return routes.map((routeId) => ({ routeId: String(routeId) }));
 }
 
-export default function Page({params}: {params: Promise<{routeId:number}>}) {
+export default function Page({params}: {params: Promise<{routeId:string}>}) {
   return (
       <div className="min-h-screen bg-gray-50">
         <BookingNav />

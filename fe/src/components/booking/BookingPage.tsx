@@ -11,7 +11,7 @@ import {
   clearBookingConflict,
   clearUnavailableSeats,
 } from "@/store/slices/bookingSlice";
-import { SeatRequest, SeatWithDetails } from "@/types/train";
+import { SeatRequest, SeatWithAvailability } from "@/types/train";
 import { BookingNav } from "@/components/booking/BookingNav";
 import { BookingAlert } from "@/components/booking/BookingAlert";
 import { BookingResultBanner } from "@/components/booking/BookingResultBanner";
@@ -44,7 +44,7 @@ export function BookingPage() {
   const [fromStationId, setFromStationId] = useState("");
   const [toStationId, setToStationId] = useState("");
   const [travelDate, setTravelDate] = useState("");
-  const [selectedSeat, setSelectedSeat] = useState<SeatWithDetails | null>(
+  const [selectedSeat, setSelectedSeat] = useState<SeatWithAvailability | null>(
     null,
   );
   const [seatsStale, setSeatsStale] = useState(true);
@@ -59,7 +59,7 @@ export function BookingPage() {
   const buildJourneySeatsRequest = (): SeatRequest | null => {
     if (!fromStationId || !toStationId || !travelDate || !routeId) return null;
     return {
-      routeId: Number(routeId),
+      routeId: routeId,
       from: Number(fromStationId),
       to: Number(toStationId),
       date: travelDate,
@@ -94,7 +94,7 @@ export function BookingPage() {
     markJourneyDetailsChanged();
   };
 
-  const selectSeat = (seat: SeatWithDetails) => {
+  const selectSeat = (seat: SeatWithAvailability) => {
     setSelectedSeat(seat);
   };
 
@@ -202,7 +202,7 @@ export function BookingPage() {
 
         {seats.length > 0 && (
           <SeatMap
-            seats={seats}
+            seats ={seats}
             selectedSeat={selectedSeat}
             seatsStale={seatsStale}
             unavailableSeatIds={unavailableSeatIds}

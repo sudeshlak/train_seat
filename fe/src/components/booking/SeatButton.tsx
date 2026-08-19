@@ -1,13 +1,13 @@
 "use client";
 
-import { SeatWithDetails } from "@/types/train";
+import { SeatWithAvailability } from "@/types/train";
 import { getClassColor } from "@/utils/seatClass";
 
 interface SeatButtonProps {
-  seat: SeatWithDetails;
+  seat: SeatWithAvailability;
   isSelectable: boolean;
   isSelected: boolean;
-  onSelect: (seat: SeatWithDetails) => void;
+  onSelect: (seat: SeatWithAvailability) => void;
 }
 
 export function SeatButton({
@@ -36,7 +36,7 @@ export function SeatButton({
       type="button"
       disabled={!isSelectable}
       onClick={handleClick}
-      className={`p-1.5 rounded border transition-all text-center ${seatColorClass} ${selectedRingClass}`}
+      className={`flex flex-col items-center justify-start w-full min-w-0 h-[3.25rem] p-1.5 rounded border transition-all text-center overflow-hidden ${seatColorClass} ${selectedRingClass}`}
     >
       <p className="text-xs font-semibold leading-tight">{seat.seat.number}</p>
       <p className="text-[10px] leading-tight opacity-80">{classLabel}</p>

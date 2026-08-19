@@ -42,15 +42,18 @@ export interface ClassType {
   name: string;
 }
 
-export interface SeatWithDetails {
+export interface SeatDetails{
   seat: Seat;
   coach: Coach;
   classType: ClassType;
+}
+
+export interface SeatWithAvailability extends SeatDetails{
   available: boolean;
 }
 
 export interface SeatRequest {
-  routeId: number;
+  routeId: string;
   from: number;
   to: number;
   date: string;
@@ -92,4 +95,10 @@ export interface AvailableRoutesResponse {
 
 export interface BookingsResponse {
   bookings: BookingResponse[];
+}
+
+export interface ITodayBooked {
+  seatId: number;
+  startStation: string;
+  endStation: string;
 }

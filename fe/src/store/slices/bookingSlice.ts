@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import {
   RouteDetails,
-  SeatWithDetails,
+  SeatWithAvailability,
   SeatRequest,
   SeatValidationError,
   BookSeatRequest,
@@ -12,7 +12,7 @@ import { trainService } from "@/services/trainService";
 
 interface BookingState {
   routeDetails: RouteDetails | null;
-  seats: SeatWithDetails[];
+  seats: SeatWithAvailability[];
   loading: boolean;
   seatsLoading: boolean;
   bookingLoading: boolean;
