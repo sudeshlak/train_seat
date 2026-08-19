@@ -1,10 +1,12 @@
 "use client";
 
 import { useReducer } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { loginThunk, clearError } from "@/store/slices/authSlice";
 import { ErrorType } from "@/api/errors";
+import { goBackOrHome } from "@/utils/navigation";
 
 interface LoginState {
   email: string;
@@ -47,7 +49,7 @@ export function LoginForm() {
     );
 
     if (loginThunk.fulfilled.match(result)) {
-      router.push("/home");
+      goBackOrHome(router);
     } else if (loginThunk.rejected.match(result)) {
       const payload = result.payload as any;
       if (payload?.type === ErrorType.UNAUTHENTICATED) {
@@ -125,12 +127,13 @@ export function LoginForm() {
           </div>
 
           <div className="text-center">
-            <a
+            <Link
               href="/signup"
+              replace
               className="font-medium text-indigo-600 hover:text-indigo-500"
             >
               Don't have an account? Sign up
-            </a>
+            </Link>
           </div>
         </form>
       </div>
