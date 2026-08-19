@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   fetchRouteThunk,
@@ -11,23 +11,22 @@ import {
   clearBookingConflict,
   clearUnavailableSeats,
 } from "@/store/slices/bookingSlice";
-import { SeatRequest, SeatWithDetails } from "@/types/train";
+import { SeatRequest, SeatWithAvailability } from "@/types/train";
 import { BookingNav } from "@/components/booking/BookingNav";
 import { BookingAlert } from "@/components/booking/BookingAlert";
 import { BookingResultBanner } from "@/components/booking/BookingResultBanner";
 import { RouteLoading } from "@/components/booking/RouteLoading";
 import { RouteNotFound } from "@/components/booking/RouteNotFound";
-import { RouteSummary } from "@/components/booking/RouteSummary";
 import { JourneyDetailsForm } from "@/components/booking/JourneyDetailsForm";
 import { SeatMap } from "@/components/booking/SeatMap";
 import { BookingPanel } from "@/components/booking/BookingPanel";
+import { bumpRouteClick } from "@/utils/cookie";
 
 export function BookingPage() {
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const params = useParams();
   const routeId = params.routeId as string;
-
-  const { user } = useAppSelector((state) => state.auth);
   const {
     routeDetails,
     seats,
@@ -40,11 +39,12 @@ export function BookingPage() {
     error,
     validationErrors,
   } = useAppSelector((state) => state.booking);
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   const [fromStationId, setFromStationId] = useState("");
   const [toStationId, setToStationId] = useState("");
   const [travelDate, setTravelDate] = useState("");
-  const [selectedSeat, setSelectedSeat] = useState<SeatWithDetails | null>(
+  const [selectedSeat, setSelectedSeat] = useState<SeatWithAvailability | null>(
     null,
   );
   const [seatsStale, setSeatsStale] = useState(true);
@@ -52,13 +52,14 @@ export function BookingPage() {
   useEffect(() => {
     if (routeId) {
       dispatch(fetchRouteThunk(routeId));
+      bumpRouteClick(Number(routeId));
     }
   }, [dispatch, routeId]);
 
   const buildJourneySeatsRequest = (): SeatRequest | null => {
     if (!fromStationId || !toStationId || !travelDate || !routeId) return null;
     return {
-      routeId: Number(routeId),
+      routeId: routeId,
       from: Number(fromStationId),
       to: Number(toStationId),
       date: travelDate,
@@ -93,7 +94,7 @@ export function BookingPage() {
     markJourneyDetailsChanged();
   };
 
-  const selectSeat = (seat: SeatWithDetails) => {
+  const selectSeat = (seat: SeatWithAvailability) => {
     setSelectedSeat(seat);
   };
 
@@ -120,6 +121,11 @@ export function BookingPage() {
       !unavailableSeatIds.includes(selectedSeat.seat.id);
 
     if (!canConfirmBooking) {
+      return;
+    }
+
+    if (!isAuthenticated) {
+      router.push("/login");
       return;
     }
 
@@ -151,7 +157,7 @@ export function BookingPage() {
   if (!routeDetails) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <BookingNav userEmail={user?.email ?? ""} />
+        <BookingNav />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {error && <BookingAlert message={error} />}
           {validationErrors.routeId && (
@@ -165,9 +171,6 @@ export function BookingPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <BookingNav userEmail={user?.email ?? ""} />
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {error && <BookingAlert message={error} />}
 
         <BookingResultBanner
@@ -179,8 +182,6 @@ export function BookingPage() {
         {validationErrors.routeId && (
           <BookingAlert message={validationErrors.routeId} />
         )}
-
-        <RouteSummary routeDetails={routeDetails} />
 
         <JourneyDetailsForm
           routeDetails={routeDetails}
@@ -201,7 +202,7 @@ export function BookingPage() {
 
         {seats.length > 0 && (
           <SeatMap
-            seats={seats}
+            seats ={seats}
             selectedSeat={selectedSeat}
             seatsStale={seatsStale}
             unavailableSeatIds={unavailableSeatIds}
@@ -224,7 +225,6 @@ export function BookingPage() {
             onConfirmBooking={confirmSeatBooking}
           />
         )}
-      </main>
     </div>
   );
 }

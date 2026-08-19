@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.train_seat.api.dto.route.AvaialableRoutesResponse;
 import com.train_seat.api.dto.route.RouteDetailResponse;
 import com.train_seat.api.dto.route.StationSummary;
 import com.train_seat.api.dto.route.StopOrderResponse;
@@ -40,6 +41,14 @@ public class RouteService {
 				route.getTime().format(DEPARTURE_TIME),
 				stopOrder);
 	}
+    
+    @Transactional(readOnly = true)
+    public AvaialableRoutesResponse getAvailableRoutes() {
+        List<Long> routes = routeRepository.findAll().stream()
+                .map(Route::getId)
+                .toList();
+        return new AvaialableRoutesResponse(routes);
+    }
 
 	private StopOrderResponse toStopOrderResponse(StopOrder stop) {
 		return new StopOrderResponse(

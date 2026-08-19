@@ -11,7 +11,7 @@ export function withAuth<P extends object>(Component: ComponentType<P>) {
 
     useEffect(() => {
       if (!isAuthenticated) {
-        router.replace("/login");
+        router.push("/login");
       }
     }, [isAuthenticated, router]);
 

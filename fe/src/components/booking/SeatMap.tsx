@@ -1,15 +1,15 @@
 "use client";
 
-import { SeatWithDetails } from "@/types/train";
+import { SeatWithAvailability } from "@/types/train";
 import { SeatButton } from "@/components/booking/SeatButton";
 import { groupSeatsByCoach, isSeatSelectable } from "@/utils/seats";
 
 interface SeatMapProps {
-  seats: SeatWithDetails[];
-  selectedSeat: SeatWithDetails | null;
+  seats: SeatWithAvailability[];
+  selectedSeat: SeatWithAvailability | null;
   seatsStale: boolean;
   unavailableSeatIds: number[];
-  onSelectSeat: (seat: SeatWithDetails) => void;
+  onSelectSeat: (seat: SeatWithAvailability) => void;
 }
 
 export function SeatMap({
@@ -43,7 +43,7 @@ export function SeatMap({
                 </span>
               )}
             </h4>
-            <div className="grid grid-cols-8 md:grid-cols-10 gap-1.5">
+            <div className="grid grid-cols-8 md:grid-cols-10 gap-1.5 items-stretch">
               {coachSeats.map((seat) => {
                 const isSelectable = isSeatSelectable(
                   seat,
